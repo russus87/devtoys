@@ -1,6 +1,6 @@
 {
   "name": "devtoys",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A beautiful offline Swiss-army knife for developers — the DevToys, done right",
   "type": "module",
   "scripts": {

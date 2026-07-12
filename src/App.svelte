@@ -7,6 +7,7 @@
     type ToolMeta,
     type CategoryId,
   } from "./lib/tools";
+  import CommandPalette from "./lib/CommandPalette.svelte";
 
   // ---- persisted UI state ------------------------------------------------
   const THEME_KEY = "devtoys.theme";
@@ -28,6 +29,19 @@
 
   let query = $state("");
   let activeId = $state<string | null>(null);
+  let paletteOpen = $state(false);
+
+  // global Ctrl/⌘+K toggles the command palette
+  $effect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        paletteOpen = !paletteOpen;
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
 
   $effect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -96,7 +110,9 @@
     </div>
 
     <div class="top-actions">
-      <span class="pill count-pill">{TOOLS.length} strumenti</span>
+      <button class="kbd-btn" onclick={() => (paletteOpen = true)} title="Palette comandi (Ctrl+K)">
+        <span class="kbd-ico">⌘</span>K
+      </button>
       <button class="icon-btn" onclick={toggleTheme} title="Tema" aria-label="Cambia tema">
         {theme === "light" ? "🌙" : "☀️"}
       </button>
@@ -203,6 +219,16 @@
       </footer>
     {/if}
   </main>
+
+  {#if paletteOpen}
+    <CommandPalette
+      onSelect={(id) => {
+        open(id);
+        paletteOpen = false;
+      }}
+      onClose={() => (paletteOpen = false)}
+    />
+  {/if}
 </div>
 
 <!-- tool card snippet -->
@@ -327,9 +353,26 @@
     align-items: center;
     gap: 10px;
   }
-  .count-pill {
-    background: var(--primary-soft);
-    color: var(--primary);
+  .kbd-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    height: 40px;
+    padding: 0 13px;
+    border-radius: 12px;
+    background: var(--surface-3);
+    color: var(--ink-dim);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .kbd-btn:hover {
+    background: var(--border-2);
+    color: var(--ink);
+  }
+  .kbd-ico {
+    font-size: 14px;
   }
   .icon-btn {
     width: 40px;
