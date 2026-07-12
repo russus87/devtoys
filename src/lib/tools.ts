@@ -30,7 +30,31 @@ import Regex from "./tools/Regex.svelte";
 import Markdown from "./tools/Markdown.svelte";
 import Escape from "./tools/Escape.svelte";
 
-export type CategoryId = "convert" | "encode" | "format" | "generate" | "text";
+import PdfToImage from "./tools/PdfToImage.svelte";
+import PdfToText from "./tools/PdfToText.svelte";
+import PdfToDocx from "./tools/PdfToDocx.svelte";
+import ImagesToPdf from "./tools/ImagesToPdf.svelte";
+import PdfMerge from "./tools/PdfMerge.svelte";
+import PdfSplit from "./tools/PdfSplit.svelte";
+import PdfRotate from "./tools/PdfRotate.svelte";
+import PdfDelete from "./tools/PdfDelete.svelte";
+import PdfReorder from "./tools/PdfReorder.svelte";
+import PdfCompare from "./tools/PdfCompare.svelte";
+import PdfOptimize from "./tools/PdfOptimize.svelte";
+import PdfSanitize from "./tools/PdfSanitize.svelte";
+import PdfWatermark from "./tools/PdfWatermark.svelte";
+import PdfMetadata from "./tools/PdfMetadata.svelte";
+import PdfStructure from "./tools/PdfStructure.svelte";
+import PdfUa from "./tools/PdfUa.svelte";
+import PdfA from "./tools/PdfA.svelte";
+
+import LoadTest from "./tools/LoadTest.svelte";
+import MockServer from "./tools/MockServer.svelte";
+import DataGen from "./tools/DataGen.svelte";
+import SmokeRunner from "./tools/SmokeRunner.svelte";
+import HttpProxy from "./tools/HttpProxy.svelte";
+
+export type CategoryId = "convert" | "encode" | "format" | "generate" | "text" | "pdf" | "test";
 
 export interface Category {
   id: CategoryId;
@@ -44,6 +68,8 @@ export const CATEGORIES: Category[] = [
   { id: "format", label: "Formattatori", emoji: "🧾" },
   { id: "generate", label: "Generatori", emoji: "🎲" },
   { id: "text", label: "Testo", emoji: "🔤" },
+  { id: "pdf", label: "PDF", emoji: "📄" },
+  { id: "test", label: "API & Test", emoji: "🧪" },
 ];
 
 export interface ToolMeta {
@@ -91,6 +117,32 @@ export const TOOLS: ToolMeta[] = [
   { id: "regex", name: "Tester regex", desc: "Prova espressioni regolari con evidenziazione.", category: "text", emoji: "✳️", keywords: "regex regexp espressioni regolari match", component: Regex },
   { id: "markdown", name: "Anteprima Markdown", desc: "Rendi Markdown in HTML in tempo reale.", category: "text", emoji: "📓", keywords: "markdown md preview anteprima", component: Markdown },
   { id: "escape", name: "Escape stringa", desc: "Escape/unescape per JSON, JS e altri linguaggi.", category: "text", emoji: "␛", keywords: "escape unescape backslash stringa", component: Escape },
+
+  // pdf
+  { id: "pdf-to-image", name: "PDF → immagini", desc: "Esporta le pagine come PNG o JPEG.", category: "pdf", emoji: "🖼️", keywords: "pdf immagini png jpeg render pagine", component: PdfToImage },
+  { id: "pdf-to-text", name: "PDF → testo", desc: "Estrai il testo in Testo, Markdown o HTML.", category: "pdf", emoji: "📃", keywords: "pdf testo estrai markdown html", component: PdfToText },
+  { id: "pdf-to-docx", name: "PDF → Word", desc: "Esporta in .docx (beta, solo testo).", category: "pdf", emoji: "📝", keywords: "pdf word docx converti office", component: PdfToDocx },
+  { id: "images-to-pdf", name: "Immagini → PDF", desc: "Unisci più immagini in un unico PDF.", category: "pdf", emoji: "🗂️", keywords: "immagini pdf jpg png unisci", component: ImagesToPdf },
+  { id: "pdf-merge", name: "Unisci PDF", desc: "Combina più PDF in ordine.", category: "pdf", emoji: "➕", keywords: "pdf unisci merge combina", component: PdfMerge },
+  { id: "pdf-split", name: "Dividi / estrai pagine", desc: "Estrai un intervallo di pagine.", category: "pdf", emoji: "✂️", keywords: "pdf dividi estrai split pagine", component: PdfSplit },
+  { id: "pdf-rotate", name: "Ruota pagine", desc: "Ruota pagine di 90°, 180° o 270°.", category: "pdf", emoji: "🔃", keywords: "pdf ruota rotate pagine", component: PdfRotate },
+  { id: "pdf-delete", name: "Elimina pagine", desc: "Rimuovi pagine da un PDF.", category: "pdf", emoji: "🗑️", keywords: "pdf elimina rimuovi pagine", component: PdfDelete },
+  { id: "pdf-reorder", name: "Riordina pagine", desc: "Cambia l'ordine delle pagine.", category: "pdf", emoji: "🔀", keywords: "pdf riordina ordine pagine", component: PdfReorder },
+  { id: "pdf-compare", name: "Confronta PDF", desc: "Diff testo e visivo tra due PDF.", category: "pdf", emoji: "🔍", keywords: "pdf confronta diff compara", component: PdfCompare },
+  { id: "pdf-optimize", name: "Ottimizza / comprimi", desc: "Riduci il peso del PDF.", category: "pdf", emoji: "🗜️", keywords: "pdf ottimizza comprimi peso dimensione", component: PdfOptimize },
+  { id: "pdf-sanitize", name: "Sanitizza PDF", desc: "Rimuovi JavaScript, metadati e allegati.", category: "pdf", emoji: "🧼", keywords: "pdf sanitizza pulisci javascript metadati", component: PdfSanitize },
+  { id: "pdf-watermark", name: "Filigrana", desc: "Applica una filigrana di testo.", category: "pdf", emoji: "💧", keywords: "pdf filigrana watermark testo", component: PdfWatermark },
+  { id: "pdf-metadata", name: "Metadati PDF", desc: "Leggi titolo, autore e proprietà del documento.", category: "pdf", emoji: "🏷️", keywords: "pdf metadati proprietà autore titolo", component: PdfMetadata },
+  { id: "pdf-structure", name: "Struttura / tag tree", desc: "Esporta l'albero dei tag in JSON o XML.", category: "pdf", emoji: "🌳", keywords: "pdf struttura tag tree accessibilità", component: PdfStructure },
+  { id: "pdf-ua", name: "Check PDF/UA", desc: "Verifica di accessibilità (Matterhorn).", category: "pdf", emoji: "♿", keywords: "pdf ua accessibilità matterhorn verifica", component: PdfUa },
+  { id: "pdf-a", name: "Check PDF/A (base)", desc: "Controllo di conformità di base per l'archiviazione.", category: "pdf", emoji: "📚", keywords: "pdf a archiviazione conformità verifica", component: PdfA },
+
+  // test
+  { id: "load-test", name: "Load / performance test", desc: "Carico concorrente con p50/p95/p99 e grafici live.", category: "test", emoji: "🚀", keywords: "load test carico performance jmeter benchmark percentili", component: LoadTest },
+  { id: "mock-server", name: "Mock server", desc: "Endpoint finti con regole, latenza ed errori.", category: "test", emoji: "🎭", keywords: "mock server stub api finto wiremock", component: MockServer },
+  { id: "data-gen", name: "Generatore dati di test", desc: "IBAN, codice fiscale, P.IVA e persone in JSON/CSV/SQL.", category: "test", emoji: "🧬", keywords: "dati test iban codice fiscale piva fake generatore", component: DataGen },
+  { id: "smoke-runner", name: "Smoke / synthetic runner", desc: "Sequenza di chiamate con asserzioni.", category: "test", emoji: "🔦", keywords: "smoke synthetic test asserzioni steps collaudo", component: SmokeRunner },
+  { id: "http-proxy", name: "HTTP proxy / inspector", desc: "Reverse-proxy verso un target: logga e ispeziona.", category: "test", emoji: "🛰️", keywords: "http proxy inspector traffico reverse debug", component: HttpProxy },
 ];
 
 export function toolsByCategory(cat: CategoryId): ToolMeta[] {

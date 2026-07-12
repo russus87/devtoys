@@ -23,7 +23,7 @@ jobs:
           pacman -Syu --noconfirm --needed \
             base-devel git rust nodejs npm \
             webkit2gtk-4.1 gtk3 libappindicator-gtk3 \
-            librsvg patchelf openssl sudo
+            librsvg patchelf openssl sudo curl tar
 
       - uses: actions/checkout@v4
 
@@ -48,6 +48,7 @@ jobs:
           cp src-tauri/target/release/devtoys pkgstage/devtoys
           cp packaging/devtoys.desktop pkgstage/devtoys.desktop
           cp packaging/PKGBUILD pkgstage/PKGBUILD
+          bash scripts/fetch-pdfium.sh pkgstage   # -> pkgstage/libpdfium.so
           rsvg-convert -w 128 -h 128 assets/icon.svg -o pkgstage/icon-128.png
           rsvg-convert -w 256 -h 256 assets/icon.svg -o pkgstage/icon-256.png
           rsvg-convert -w 512 -h 512 assets/icon.svg -o pkgstage/icon-512.png
@@ -97,6 +98,7 @@ jobs:
       - name: Build bundles
         run: |
           npm ci
+          bash scripts/fetch-pdfium.sh src-tauri/pdfium
           npx tauri build --bundles appimage deb
 
       - uses: actions/upload-artifact@v4
@@ -130,8 +132,10 @@ jobs:
           cache: npm
 
       - name: Build bundles
+        shell: bash
         run: |
           npm ci
+          bash scripts/fetch-pdfium.sh src-tauri/pdfium
           npx tauri build --bundles msi nsis
 
       - uses: actions/upload-artifact@v4
@@ -175,6 +179,8 @@ jobs:
       - name: Build bundle
         run: |
           npm ci
+          if [ "${{ matrix.target }}" = "aarch64-apple-darwin" ]; then export PDFIUM_ARCH=arm64; else export PDFIUM_ARCH=x64; fi
+          PDFIUM_OS=mac bash scripts/fetch-pdfium.sh src-tauri/pdfium
           npx tauri build --target ${{ matrix.target }} --bundles dmg
 
       - uses: actions/upload-artifact@v4

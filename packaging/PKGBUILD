@@ -13,6 +13,8 @@ options=('!strip' '!debug')
 
 package() {
   install -Dm755 "$startdir/devtoys" "$pkgdir/usr/bin/devtoys"
+  # Native Pdfium library (loaded at runtime by the PDF tools).
+  install -Dm755 "$startdir/libpdfium.so" "$pkgdir/usr/lib/libpdfium.so"
   install -Dm644 "$startdir/devtoys.desktop" \
     "$pkgdir/usr/share/applications/devtoys.desktop"
   install -Dm644 "$startdir/icon-128.png" \

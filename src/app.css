@@ -41,6 +41,10 @@
   --c-generate-bg: #e0f3ec;
   --c-text: #e8894a;
   --c-text-bg: #fceee1;
+  --c-pdf: #e0574b;
+  --c-pdf-bg: #fdeae7;
+  --c-test: #17a1a1;
+  --c-test-bg: #e0f4f3;
 
   --radius: 16px;
   --radius-lg: 22px;
@@ -86,6 +90,8 @@
   --c-format-bg: #2a2447;
   --c-generate-bg: #163229;
   --c-text-bg: #392819;
+  --c-pdf-bg: #3a2320;
+  --c-test-bg: #10312f;
 
   --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.3);
   --shadow: 0 14px 36px rgba(0, 0, 0, 0.4);

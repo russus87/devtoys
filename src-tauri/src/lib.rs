@@ -3,6 +3,9 @@
 //! transforms, formatters, converters) lives in the frontend and never
 //! touches the backend, keeping the whole app fully offline.
 
+mod apitest;
+mod pdf;
+
 use base64::Engine;
 use hmac::{Hmac, Mac};
 use md5::Md5;
@@ -126,14 +129,57 @@ pub fn run() {
     }
 
     builder
+        .setup(|app| {
+            // Load the bundled Pdfium native library so the PDF tools can work.
+            use tauri::Manager;
+            let mut cands: Vec<std::path::PathBuf> = Vec::new();
+            if let Ok(res) = app.path().resource_dir() {
+                cands.push(res.join("pdfium"));
+            }
+            cands.push(std::path::PathBuf::from("pdfium"));
+            cands.push(std::path::PathBuf::from("src-tauri/pdfium"));
+            let _ = pdfa_core::pdfium::inizializza(&cands);
+            Ok(())
+        })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_clipboard_manager::init())
+        .manage(apitest::TestState::default())
         .invoke_handler(tauri::generate_handler![
             hash_text,
             hmac_text,
             gen_uuids,
             base64_encode_bytes,
+            apitest::load_start,
+            apitest::load_stop,
+            apitest::mock_start,
+            apitest::mock_stop,
+            apitest::mock_status,
+            apitest::proxy_start,
+            apitest::proxy_stop,
+            apitest::proxy_status,
+            apitest::smoke_run,
+            pdf::pdf_info,
+            pdf::pdf_render_page,
+            pdf::pdf_to_text,
+            pdf::pdf_to_images,
+            pdf::pdf_merge,
+            pdf::pdf_extract_pages,
+            pdf::pdf_delete_pages,
+            pdf::pdf_rotate,
+            pdf::pdf_reorder,
+            pdf::pdf_optimize,
+            pdf::pdf_compress_images,
+            pdf::pdf_sanitize,
+            pdf::pdf_metadata,
+            pdf::pdf_structure,
+            pdf::pdf_validate_ua,
+            pdf::pdf_check_pdfa,
+            pdf::pdf_compare_text,
+            pdf::pdf_compare_image,
+            pdf::pdf_watermark,
+            pdf::pdf_to_docx,
+            pdf::images_to_pdf,
         ])
         .run(tauri::generate_context!())
         .expect("error while running DevToys");

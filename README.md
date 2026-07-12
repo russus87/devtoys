@@ -30,9 +30,15 @@ payload and know it stays on your computer.
 | **Formattatori** | JSON · SQL (multi-dialetto) · XML |
 | **Generatori** | UUID (v4/v7) · Hash (MD5/SHA-1/2/3, CRC32) · HMAC · Password & token · Lorem ipsum · QR code |
 | **Testo** | Convertitore maiuscole · Confronto testo (diff) · Statistiche testo · Tester regex · Anteprima Markdown · Escape stringa |
+| **PDF** | PDF→immagini/testo/Word · Immagini→PDF · unisci/dividi/ruota/elimina/riordina · confronta · ottimizza/comprimi · sanitizza · filigrana · metadati · struttura · check PDF/UA · check PDF/A |
+| **API & Test** | Load / performance test · Mock server · Generatore dati (IBAN/CF/P.IVA) · Smoke / synthetic runner · HTTP proxy / inspector |
 
 Text transforms run entirely in the frontend; cryptographic hashes, HMAC and
-UUID generation are done natively in Rust.
+UUID generation are native Rust. The **PDF** tools reuse the Tauri-agnostic core
+of PDF Accessibility Studio (via a pinned git dependency) plus the native Pdfium
+library, bundled per-OS. The **API & Test** tools run all HTTP work in Rust
+(tokio + reqwest + axum) — no CORS limits, and everything stays local. Note that
+the mock server and proxy open a local listening port while active.
 
 ## Develop
 

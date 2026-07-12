@@ -18,3 +18,6 @@ npm-debug.log*
 
 # generated icon working files
 assets/icon-1024.png
+
+# native pdfium lib (fetched per-OS in CI)
+src-tauri/pdfium/
