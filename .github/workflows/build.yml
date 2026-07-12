@@ -40,6 +40,7 @@ jobs:
       - name: Build frontend + binary
         run: |
           npm ci
+          bash scripts/fetch-pdfium.sh src-tauri/pdfium
           npx tauri build --no-bundle
 
       - name: Stage package artifacts
@@ -48,7 +49,7 @@ jobs:
           cp src-tauri/target/release/devtoys pkgstage/devtoys
           cp packaging/devtoys.desktop pkgstage/devtoys.desktop
           cp packaging/PKGBUILD pkgstage/PKGBUILD
-          bash scripts/fetch-pdfium.sh pkgstage   # -> pkgstage/libpdfium.so
+          cp src-tauri/pdfium/libpdfium.so pkgstage/libpdfium.so
           rsvg-convert -w 128 -h 128 assets/icon.svg -o pkgstage/icon-128.png
           rsvg-convert -w 256 -h 256 assets/icon.svg -o pkgstage/icon-256.png
           rsvg-convert -w 512 -h 512 assets/icon.svg -o pkgstage/icon-512.png
