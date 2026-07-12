@@ -1,6 +1,6 @@
 [package]
 name = "devtoys"
-version = "0.3.0"
+version = "0.3.1"
 description = "A beautiful offline Swiss-army knife for developers"
 authors = ["russus"]
 edition = "2021"
