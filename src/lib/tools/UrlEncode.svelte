@@ -4,18 +4,17 @@
 
   let mode = $state("encode");
   let input = $state("");
-  let error = $state("");
 
-  const output = $derived.by(() => {
-    error = "";
-    if (!input) return "";
+  const computed = $derived.by(() => {
+    if (!input) return { output: "", error: "" };
     try {
-      return mode === "encode" ? encodeURIComponent(input) : decodeURIComponent(input);
+      return { output: mode === "encode" ? encodeURIComponent(input) : decodeURIComponent(input), error: "" };
     } catch (e) {
-      error = "Input non valido: " + (e as Error).message;
-      return "";
+      return { output: "", error: "Input non valido: " + (e as Error).message };
     }
   });
+  const output = $derived(computed.output);
+  const error = $derived(computed.error);
 </script>
 
 <div class="tool">

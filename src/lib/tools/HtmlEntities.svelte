@@ -4,7 +4,6 @@
 
   let mode = $state("escape");
   let input = $state("");
-  let error = $state("");
 
   function escapeHtml(s: string): string {
     return s
@@ -19,16 +18,16 @@
     return new DOMParser().parseFromString(s, "text/html").documentElement.textContent ?? "";
   }
 
-  const output = $derived.by(() => {
-    error = "";
-    if (!input) return "";
+  const computed = $derived.by(() => {
+    if (!input) return { output: "", error: "" };
     try {
-      return mode === "escape" ? escapeHtml(input) : unescapeHtml(input);
+      return { output: mode === "escape" ? escapeHtml(input) : unescapeHtml(input), error: "" };
     } catch (e) {
-      error = "Input non valido: " + (e as Error).message;
-      return "";
+      return { output: "", error: "Input non valido: " + (e as Error).message };
     }
   });
+  const output = $derived(computed.output);
+  const error = $derived(computed.error);
 </script>
 
 <div class="tool">

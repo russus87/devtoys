@@ -215,7 +215,7 @@
       {/each}
 
       <footer class="foot">
-        DevToys · Rust + Tauri 2 · tutto in locale, nessun dato inviato in rete.
+        DevToys — v{__APP_VERSION__}
       </footer>
     {/if}
   </main>

@@ -4,7 +4,6 @@
 
   let mode = $state("encode");
   let input = $state("");
-  let error = $state("");
 
   function utf8ToB64(s: string): string {
     const bytes = new TextEncoder().encode(s);
@@ -18,16 +17,16 @@
     return new TextDecoder().decode(bytes);
   }
 
-  const output = $derived.by(() => {
-    error = "";
-    if (!input) return "";
+  const computed = $derived.by(() => {
+    if (!input) return { output: "", error: "" };
     try {
-      return mode === "encode" ? utf8ToB64(input) : b64ToUtf8(input);
+      return { output: mode === "encode" ? utf8ToB64(input) : b64ToUtf8(input), error: "" };
     } catch (e) {
-      error = "Input non valido: " + (e as Error).message;
-      return "";
+      return { output: "", error: "Input non valido: " + (e as Error).message };
     }
   });
+  const output = $derived(computed.output);
+  const error = $derived(computed.error);
 </script>
 
 <div class="tool">

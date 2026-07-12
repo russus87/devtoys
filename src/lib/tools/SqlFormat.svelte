@@ -6,23 +6,25 @@
   let dialect = $state("sql");
   let kw = $state("upper");
   let input = $state("");
-  let error = $state("");
 
-  const output = $derived.by(() => {
-    error = "";
+  const computed = $derived.by(() => {
     const src = input.trim();
-    if (!src) return "";
+    if (!src) return { output: "", error: "" };
     try {
-      return format(input, {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        language: dialect as any,
-        keywordCase: kw === "upper" ? "upper" : "preserve",
-      });
+      return {
+        output: format(input, {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          language: dialect as any,
+          keywordCase: kw === "upper" ? "upper" : "preserve",
+        }),
+        error: "",
+      };
     } catch (e) {
-      error = (e as Error).message;
-      return "";
+      return { output: "", error: (e as Error).message };
     }
   });
+  const output = $derived(computed.output);
+  const error = $derived(computed.error);
 </script>
 
 <div class="tool">

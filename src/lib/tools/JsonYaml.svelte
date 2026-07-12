@@ -5,24 +5,23 @@
 
   let dir = $state("j2y");
   let input = $state("");
-  let error = $state("");
 
-  const output = $derived.by(() => {
-    error = "";
-    if (!input.trim()) return "";
+  const computed = $derived.by(() => {
+    if (!input.trim()) return { output: "", error: "" };
     try {
       if (dir === "j2y") {
         const obj = JSON.parse(input);
-        return yaml.dump(obj, { indent: 2, lineWidth: -1 });
+        return { output: yaml.dump(obj, { indent: 2, lineWidth: -1 }), error: "" };
       } else {
         const obj = yaml.load(input);
-        return JSON.stringify(obj, null, 2);
+        return { output: JSON.stringify(obj, null, 2), error: "" };
       }
     } catch (e) {
-      error = (e as Error).message;
-      return "";
+      return { output: "", error: (e as Error).message };
     }
   });
+  const output = $derived(computed.output);
+  const error = $derived(computed.error);
 </script>
 
 <div class="tool">

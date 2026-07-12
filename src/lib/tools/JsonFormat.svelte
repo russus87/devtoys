@@ -5,8 +5,6 @@
   let mode = $state("beautify");
   let indent = $state("2");
   let input = $state("");
-  let error = $state("");
-  let valid = $state(false);
 
   function indentValue(): string | number {
     if (indent === "tab") return "\t";
@@ -14,26 +12,25 @@
     return 2;
   }
 
-  const output = $derived.by(() => {
-    error = "";
-    valid = false;
+  const computed = $derived.by((): { output: string; error: string; valid: boolean } => {
     const src = input.trim();
-    if (!src) return "";
+    if (!src) return { output: "", error: "", valid: false };
     try {
       const obj = JSON.parse(input);
       if (mode === "beautify") {
-        return JSON.stringify(obj, null, indentValue());
+        return { output: JSON.stringify(obj, null, indentValue()), error: "", valid: false };
       } else if (mode === "minify") {
-        return JSON.stringify(obj);
+        return { output: JSON.stringify(obj), error: "", valid: false };
       } else {
-        valid = true;
-        return "";
+        return { output: "", error: "", valid: true };
       }
     } catch (e) {
-      error = (e as Error).message;
-      return "";
+      return { output: "", error: (e as Error).message, valid: false };
     }
   });
+  const output = $derived(computed.output);
+  const error = $derived(computed.error);
+  const valid = $derived(computed.valid);
 </script>
 
 <div class="tool">

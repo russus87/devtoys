@@ -2,7 +2,6 @@
   import Pane from "../ui/Pane.svelte";
 
   let token = $state("");
-  let error = $state("");
 
   function b64urlDecode(s: string): string {
     const pad = s.replace(/-/g, "+").replace(/_/g, "/");
@@ -18,28 +17,30 @@
     payloadObj: Record<string, unknown>;
   }
 
-  const decoded = $derived.by((): Decoded | null => {
-    error = "";
+  const computed = $derived.by((): { decoded: Decoded | null; error: string } => {
     const t = token.trim();
-    if (!t) return null;
+    if (!t) return { decoded: null, error: "" };
     const parts = t.split(".");
     if (parts.length !== 3) {
-      error = "Il token deve avere 3 parti separate da '.'";
-      return null;
+      return { decoded: null, error: "Il token deve avere 3 parti separate da '.'" };
     }
     try {
       const headerObj = JSON.parse(b64urlDecode(parts[0]));
       const payloadObj = JSON.parse(b64urlDecode(parts[1])) as Record<string, unknown>;
       return {
-        header: JSON.stringify(headerObj, null, 2),
-        payload: JSON.stringify(payloadObj, null, 2),
-        payloadObj,
+        decoded: {
+          header: JSON.stringify(headerObj, null, 2),
+          payload: JSON.stringify(payloadObj, null, 2),
+          payloadObj,
+        },
+        error: "",
       };
     } catch (e) {
-      error = "Token non valido: " + (e as Error).message;
-      return null;
+      return { decoded: null, error: "Token non valido: " + (e as Error).message };
     }
   });
+  const decoded = $derived(computed.decoded);
+  const error = $derived(computed.error);
 
   function asUnixSeconds(v: unknown): number | null {
     if (typeof v === "number" && Number.isFinite(v)) return v;

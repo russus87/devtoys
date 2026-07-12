@@ -5,7 +5,6 @@
   let mode = $state("indent");
   let indentSize = $state("2");
   let input = $state("");
-  let error = $state("");
 
   function isValidXml(xml: string): boolean {
     const doc = new DOMParser().parseFromString(xml, "application/xml");
@@ -29,26 +28,25 @@
       .trim();
   }
 
-  const output = $derived.by(() => {
-    error = "";
+  const computed = $derived.by(() => {
     const src = input.trim();
-    if (!src) return "";
+    if (!src) return { output: "", error: "" };
     if (!isValidXml(src)) {
-      error = "XML non valido";
-      return "";
+      return { output: "", error: "XML non valido" };
     }
     try {
       if (mode === "indent") {
         const pad = indentSize === "4" ? "    " : "  ";
-        return formatXml(src, pad);
+        return { output: formatXml(src, pad), error: "" };
       } else {
-        return src.replace(/>\s+</g, "><").trim();
+        return { output: src.replace(/>\s+</g, "><").trim(), error: "" };
       }
     } catch (e) {
-      error = (e as Error).message;
-      return "";
+      return { output: "", error: (e as Error).message };
     }
   });
+  const output = $derived(computed.output);
+  const error = $derived(computed.error);
 </script>
 
 <div class="tool">

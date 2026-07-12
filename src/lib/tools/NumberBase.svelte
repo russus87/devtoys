@@ -4,20 +4,19 @@
 
   let value = $state("");
   let fromBase = $state("10");
-  let error = $state("");
   let copiedKey = $state("");
 
-  const parsed = $derived.by(() => {
-    error = "";
+  const computed = $derived.by((): { value: number | null; error: string } => {
     const v = value.trim();
-    if (!v) return null;
+    if (!v) return { value: null, error: "" };
     const n = parseInt(v, Number(fromBase));
     if (Number.isNaN(n)) {
-      error = "Numero non valido nella base selezionata";
-      return null;
+      return { value: null, error: "Numero non valido nella base selezionata" };
     }
-    return n;
+    return { value: n, error: "" };
   });
+  const parsed = $derived(computed.value);
+  const error = $derived(computed.error);
 
   const rows = $derived.by(() => {
     if (parsed === null) return null;
