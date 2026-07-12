@@ -13,8 +13,10 @@ options=('!strip' '!debug')
 
 package() {
   install -Dm755 "$startdir/devtoys" "$pkgdir/usr/bin/devtoys"
-  # Native Pdfium library (loaded at runtime by the PDF tools).
-  install -Dm755 "$startdir/libpdfium.so" "$pkgdir/usr/lib/libpdfium.so"
+  # Native Pdfium library (loaded at runtime by the PDF tools). Kept in a
+  # package-private dir so it never clashes with another package that ships
+  # /usr/lib/libpdfium.so (e.g. pdf-accessibility-studio).
+  install -Dm755 "$startdir/libpdfium.so" "$pkgdir/usr/lib/devtoys/libpdfium.so"
   install -Dm644 "$startdir/devtoys.desktop" \
     "$pkgdir/usr/share/applications/devtoys.desktop"
   install -Dm644 "$startdir/icon-128.png" \

@@ -138,6 +138,9 @@ pub fn run() {
             }
             cands.push(std::path::PathBuf::from("pdfium"));
             cands.push(std::path::PathBuf::from("src-tauri/pdfium"));
+            // Arch package ships it in a private dir to avoid clashing with
+            // other packages that own /usr/lib/libpdfium.so.
+            cands.push(std::path::PathBuf::from("/usr/lib/devtoys"));
             let _ = pdfa_core::pdfium::inizializza(&cands);
             Ok(())
         })
