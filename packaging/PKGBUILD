@@ -1,0 +1,24 @@
+# Maintainer: russus <russus2@gmail.com>
+# Prebuilt PKGBUILD: assembles an Arch package from artifacts already produced
+# by the CI build step (no compilation happens here).
+pkgname=devtoys
+pkgver=0.0.0
+pkgrel=1
+pkgdesc="A beautiful offline Swiss-army knife for developers — JSON/YAML, JWT, hashes, Base64, regex and more"
+arch=('x86_64')
+url="https://github.com/russus87/devtoys"
+license=('MIT')
+depends=('webkit2gtk-4.1' 'gtk3' 'libappindicator-gtk3')
+options=('!strip' '!debug')
+
+package() {
+  install -Dm755 "$startdir/devtoys" "$pkgdir/usr/bin/devtoys"
+  install -Dm644 "$startdir/devtoys.desktop" \
+    "$pkgdir/usr/share/applications/devtoys.desktop"
+  install -Dm644 "$startdir/icon-128.png" \
+    "$pkgdir/usr/share/icons/hicolor/128x128/apps/devtoys.png"
+  install -Dm644 "$startdir/icon-256.png" \
+    "$pkgdir/usr/share/icons/hicolor/256x256/apps/devtoys.png"
+  install -Dm644 "$startdir/icon-512.png" \
+    "$pkgdir/usr/share/icons/hicolor/512x512/apps/devtoys.png"
+}

@@ -1,0 +1,45 @@
+<script lang="ts">
+  import yaml from "js-yaml";
+  import Pane from "../ui/Pane.svelte";
+  import Segmented from "../ui/Segmented.svelte";
+
+  let dir = $state("j2y");
+  let input = $state("");
+  let error = $state("");
+
+  const output = $derived.by(() => {
+    error = "";
+    if (!input.trim()) return "";
+    try {
+      if (dir === "j2y") {
+        const obj = JSON.parse(input);
+        return yaml.dump(obj, { indent: 2, lineWidth: -1 });
+      } else {
+        const obj = yaml.load(input);
+        return JSON.stringify(obj, null, 2);
+      }
+    } catch (e) {
+      error = (e as Error).message;
+      return "";
+    }
+  });
+</script>
+
+<div class="tool">
+  <div class="tool-controls">
+    <Segmented
+      bind:value={dir}
+      options={[
+        { value: "j2y", label: "JSON → YAML" },
+        { value: "y2j", label: "YAML → JSON" },
+      ]}
+    />
+  </div>
+  <div class="split">
+    <Pane label={dir === "j2y" ? "JSON" : "YAML"} bind:value={input} placeholder="Incolla qui…" />
+    <div class="stack grow">
+      <Pane label={dir === "j2y" ? "YAML" : "JSON"} value={output} readonly showPaste={false} />
+      {#if error}<div class="notice bad">{error}</div>{/if}
+    </div>
+  </div>
+</div>

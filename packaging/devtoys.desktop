@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=DevToys
+Comment=A beautiful offline Swiss-army knife for developers
+Exec=devtoys
+Icon=devtoys
+Terminal=false
+Categories=Development;Utility;
+StartupNotify=true
+Keywords=developer;tools;json;yaml;base64;jwt;hash;regex;formatter;encode;
