@@ -11,6 +11,7 @@ import Base64Image from "./tools/Base64Image.svelte";
 import UrlEncode from "./tools/UrlEncode.svelte";
 import HtmlEntities from "./tools/HtmlEntities.svelte";
 import Jwt from "./tools/Jwt.svelte";
+import Unicode from "./tools/Unicode.svelte";
 
 import JsonFormat from "./tools/JsonFormat.svelte";
 import SqlFormat from "./tools/SqlFormat.svelte";
@@ -96,6 +97,7 @@ export const TOOLS: ToolMeta[] = [
   { id: "url", name: "URL encode / decode", desc: "Percent-encoding di URL e componenti.", category: "encode", emoji: "🔗", keywords: "url percent encode decode", component: UrlEncode },
   { id: "html-entities", name: "Entità HTML", desc: "Escape e unescape di entità HTML.", category: "encode", emoji: "🏷️", keywords: "html entities escape amp lt gt", component: HtmlEntities },
   { id: "jwt", name: "Decoder JWT", desc: "Ispeziona header, payload e scadenza di un JWT.", category: "encode", emoji: "🔑", keywords: "jwt token json web decode", component: Jwt },
+  { id: "unicode", name: "Testo ⇄ Unicode", desc: "Codifica in escape \\uXXXX o Phoenix /UXXXX e viceversa.", category: "encode", emoji: "🔣", keywords: "unicode escape codepoint code point \\u phoenix testo caratteri", component: Unicode },
 
   // format
   { id: "json-format", name: "JSON formatter", desc: "Formatta, valida e minifica JSON.", category: "format", emoji: "🧾", keywords: "json format pretty minify validate", component: JsonFormat },
