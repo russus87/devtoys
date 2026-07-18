@@ -8,6 +8,14 @@
     type CategoryId,
   } from "./lib/tools";
   import CommandPalette from "./lib/CommandPalette.svelte";
+  import {
+    api,
+    on,
+    inTauri,
+    type UpdateInfo,
+    type UpdateProgress,
+  } from "./lib/api";
+  import { openUrl } from "@tauri-apps/plugin-opener";
 
   // ---- persisted UI state ------------------------------------------------
   const THEME_KEY = "devtoys.theme";
@@ -30,6 +38,82 @@
   let query = $state("");
   let activeId = $state<string | null>(null);
   let paletteOpen = $state(false);
+
+  // ---- self-update + tray -----------------------------------------------
+  const RELEASES_URL = "https://github.com/russus87/devtoys/releases";
+  let update = $state<UpdateInfo | null>(null);
+  let progress = $state<UpdateProgress | null>(null);
+  let updateBusy = $state(false);
+  let updateDismissed = $state(false);
+  let upToDateMsg = $state(false);
+
+  async function checkUpdate(manual = false) {
+    try {
+      const info = await api.updateCheck();
+      update = info;
+      if (info.available) updateDismissed = false;
+      if (manual && !info.available) {
+        upToDateMsg = true;
+        setTimeout(() => (upToDateMsg = false), 3500);
+      }
+    } catch (e) {
+      if (manual) {
+        progress = { phase: "error", message: String(e), percent: -1 };
+      }
+    }
+  }
+
+  async function installUpdate() {
+    if (!update) return;
+    if (update.installable) {
+      updateBusy = true;
+      progress = { phase: "download", message: "Avvio…", percent: -1 };
+      try {
+        await api.updateInstall();
+      } catch {
+        /* error surfaced via the update-progress event */
+      } finally {
+        updateBusy = false;
+      }
+    } else {
+      openRelease();
+    }
+  }
+
+  function openRelease() {
+    openUrl(RELEASES_URL).catch(() => {});
+  }
+
+  $effect(() => {
+    if (!inTauri()) return;
+
+    // Feed the tray the tool list (used by the native Linux menu).
+    api
+      .setTrayMenu(
+        CATEGORIES.map((c) => ({
+          label: c.label,
+          emoji: c.emoji,
+          tools: toolsByCategory(c.id).map((t) => ({ id: t.id, name: t.name })),
+        })),
+      )
+      .catch(() => {});
+
+    // Silent check on startup — the banner only appears if there's an update.
+    checkUpdate();
+
+    const unlisteners: Promise<() => void>[] = [
+      on<string>("open-tool", (id) => open(id)),
+      on<void>("menu-check-update", () => checkUpdate(true)),
+      on<UpdateInfo>("update-available", (info) => {
+        update = info;
+        updateDismissed = false;
+      }),
+      on<UpdateProgress>("update-progress", (p) => (progress = p)),
+    ];
+    return () => {
+      unlisteners.forEach((u) => u.then((fn) => fn()).catch(() => {}));
+    };
+  });
 
   // global Ctrl/⌘+K toggles the command palette
   $effect(() => {
@@ -88,6 +172,54 @@
 </script>
 
 <div class="app">
+  <!-- self-update banner -->
+  {#if progress && (progress.phase === "download" || progress.phase === "install")}
+    <div class="updatebar busy">
+      <span class="ub-ico">⬇️</span>
+      <span class="ub-text">{progress.message}</span>
+      <div class="ub-track">
+        <div
+          class="ub-fill"
+          class:indeterminate={progress.percent < 0}
+          style={progress.percent >= 0 ? `width:${progress.percent}%` : ""}
+        ></div>
+      </div>
+    </div>
+  {:else if progress && progress.phase === "done"}
+    <div class="updatebar ok">
+      <span class="ub-ico">✅</span>
+      <span class="ub-text">{progress.message}</span>
+      <button class="ub-btn" onclick={() => (progress = null)}>Chiudi</button>
+    </div>
+  {:else if progress && progress.phase === "error"}
+    <div class="updatebar bad">
+      <span class="ub-ico">⚠️</span>
+      <span class="ub-text">Aggiornamento non riuscito: {progress.message}</span>
+      <button class="ub-btn" onclick={openRelease}>Apri release</button>
+      <button class="ub-x" onclick={() => (progress = null)} aria-label="Chiudi">✕</button>
+    </div>
+  {:else if update?.available && !updateDismissed}
+    <div class="updatebar">
+      <span class="ub-ico">✨</span>
+      <span class="ub-text">
+        Nuova versione <strong>v{update.latest}</strong> disponibile
+        <span class="ub-dim">(hai la v{update.current})</span>
+      </span>
+      {#if update.installable}
+        <button class="ub-btn primary" onclick={installUpdate} disabled={updateBusy}>
+          Scarica e installa
+        </button>
+      {/if}
+      <button class="ub-btn" onclick={openRelease}>Apri release</button>
+      <button class="ub-x" onclick={() => (updateDismissed = true)} aria-label="Ignora">✕</button>
+    </div>
+  {:else if upToDateMsg}
+    <div class="updatebar ok">
+      <span class="ub-ico">✅</span>
+      <span class="ub-text">DevToys è aggiornato all'ultima versione.</span>
+    </div>
+  {/if}
+
   <!-- top bar -->
   <header class="topbar">
     <button class="brand" onclick={home} aria-label="Home">
@@ -113,6 +245,16 @@
       <button class="kbd-btn" onclick={() => (paletteOpen = true)} title="Palette comandi (Ctrl+K)">
         <span class="kbd-ico">⌘</span>K
       </button>
+      {#if inTauri()}
+        <button
+          class="icon-btn"
+          onclick={() => checkUpdate(true)}
+          title="Controlla aggiornamenti"
+          aria-label="Controlla aggiornamenti"
+        >
+          ⟳
+        </button>
+      {/if}
       <button class="icon-btn" onclick={toggleTheme} title="Tema" aria-label="Cambia tema">
         {theme === "light" ? "🌙" : "☀️"}
       </button>
@@ -266,6 +408,94 @@
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
+  }
+
+  /* self-update banner ---------------------------------------------------- */
+  .updatebar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--primary-soft), var(--surface-3));
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+    flex-shrink: 0;
+    z-index: 6;
+  }
+  .updatebar.ok {
+    background: color-mix(in srgb, var(--green) 12%, var(--surface));
+  }
+  .updatebar.bad {
+    background: color-mix(in srgb, var(--red) 12%, var(--surface));
+  }
+  .ub-ico {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .ub-text {
+    color: var(--ink);
+    min-width: 0;
+  }
+  .ub-dim {
+    color: var(--ink-faint);
+  }
+  .ub-track {
+    flex: 1;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--border-2);
+    overflow: hidden;
+    min-width: 80px;
+    max-width: 320px;
+  }
+  .ub-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-2));
+    transition: width 0.2s ease;
+  }
+  .ub-fill.indeterminate {
+    width: 35%;
+    animation: ubslide 1.1s ease-in-out infinite;
+  }
+  @keyframes ubslide {
+    0% { margin-left: -35%; }
+    100% { margin-left: 100%; }
+  }
+  .ub-btn {
+    margin-left: auto;
+    padding: 6px 13px;
+    border-radius: 9px;
+    font-size: 12.5px;
+    font-weight: 700;
+    background: var(--surface-3);
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .ub-btn + .ub-btn {
+    margin-left: 0;
+  }
+  .ub-btn:hover {
+    background: var(--border-2);
+  }
+  .ub-btn.primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    color: #fff;
+  }
+  .ub-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .ub-x {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    color: var(--ink-dim);
+    flex-shrink: 0;
+  }
+  .ub-x:hover {
+    background: var(--surface);
+    color: var(--ink);
   }
 
   /* top bar --------------------------------------------------------------- */

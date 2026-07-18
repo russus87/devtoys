@@ -122,6 +122,13 @@ body {
   height: 100vh;
 }
 
+/* The quick-launch popup is a frameless, transparent window: let its own
+   rounded card provide the surface, so the corners show through. */
+html.quicklaunch,
+html.quicklaunch body {
+  background: transparent;
+}
+
 button {
   font-family: inherit;
   cursor: pointer;

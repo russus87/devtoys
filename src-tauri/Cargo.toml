@@ -1,6 +1,6 @@
 [package]
 name = "devtoys"
-version = "0.3.2"
+version = "0.4.0"
 description = "A beautiful offline Swiss-army knife for developers"
 authors = ["russus"]
 edition = "2021"
@@ -14,10 +14,11 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["image-png"] }
+tauri = { version = "2", features = ["macos-private-api", "image-png", "tray-icon"] }
 tauri-plugin-opener = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-clipboard-manager = "2"
+tauri-plugin-notification = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 md-5 = "0.10"
@@ -34,7 +35,7 @@ uuid = { version = "1", features = ["v4", "v7"] }
 pdfa-core = { git = "https://github.com/russus87/pdf-accessibility-studio", package = "pdfa-core", rev = "a0a6cebd2d19fbffec7e6a474e584e1e250e7253" }
 
 # --- API & Test tools -------------------------------------------------------
-tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "time", "sync", "io-util"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "time", "sync", "io-util", "process", "fs"] }
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "gzip", "stream"] }
 axum = "0.7"
 rand = "0.8"
@@ -43,6 +44,7 @@ futures = "0.3"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-single-instance = "2"
+tauri-plugin-global-shortcut = "2"
 
 [profile.release]
 panic = "abort"

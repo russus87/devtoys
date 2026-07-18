@@ -5,6 +5,10 @@ import NumberBase from "./tools/NumberBase.svelte";
 import UnixTime from "./tools/UnixTime.svelte";
 import ColorConv from "./tools/ColorConv.svelte";
 import Cron from "./tools/Cron.svelte";
+import JsonCsv from "./tools/JsonCsv.svelte";
+import Roman from "./tools/Roman.svelte";
+import Contrast from "./tools/Contrast.svelte";
+import UrlParser from "./tools/UrlParser.svelte";
 
 import Base64Text from "./tools/Base64Text.svelte";
 import Base64Image from "./tools/Base64Image.svelte";
@@ -12,6 +16,7 @@ import UrlEncode from "./tools/UrlEncode.svelte";
 import HtmlEntities from "./tools/HtmlEntities.svelte";
 import Jwt from "./tools/Jwt.svelte";
 import Unicode from "./tools/Unicode.svelte";
+import BasicAuth from "./tools/BasicAuth.svelte";
 
 import JsonFormat from "./tools/JsonFormat.svelte";
 import SqlFormat from "./tools/SqlFormat.svelte";
@@ -30,6 +35,8 @@ import TextStats from "./tools/TextStats.svelte";
 import Regex from "./tools/Regex.svelte";
 import Markdown from "./tools/Markdown.svelte";
 import Escape from "./tools/Escape.svelte";
+import TextLines from "./tools/TextLines.svelte";
+import Slug from "./tools/Slug.svelte";
 
 import PdfToImage from "./tools/PdfToImage.svelte";
 import PdfToText from "./tools/PdfToText.svelte";
@@ -54,6 +61,7 @@ import MockServer from "./tools/MockServer.svelte";
 import DataGen from "./tools/DataGen.svelte";
 import SmokeRunner from "./tools/SmokeRunner.svelte";
 import HttpProxy from "./tools/HttpProxy.svelte";
+import HttpStatus from "./tools/HttpStatus.svelte";
 
 export type CategoryId = "convert" | "encode" | "format" | "generate" | "text" | "pdf" | "test";
 
@@ -90,6 +98,10 @@ export const TOOLS: ToolMeta[] = [
   { id: "unix-time", name: "Timestamp Unix", desc: "Epoch ⇄ data leggibile, con fuso locale e UTC.", category: "convert", emoji: "⏱️", keywords: "unix epoch timestamp date data ora", component: UnixTime },
   { id: "color", name: "Convertitore colore", desc: "HEX, RGB e HSL con anteprima.", category: "convert", emoji: "🎨", keywords: "color colore hex rgb hsl", component: ColorConv },
   { id: "cron", name: "Cron in italiano", desc: "Spiega un'espressione cron in linguaggio naturale.", category: "convert", emoji: "🗓️", keywords: "cron crontab schedule pianificazione", component: Cron },
+  { id: "json-csv", name: "JSON ⇄ CSV", desc: "Converti un array di oggetti JSON in CSV e viceversa.", category: "convert", emoji: "📑", keywords: "json csv converti tabella foglio spreadsheet", component: JsonCsv },
+  { id: "url-parser", name: "Analizza URL", desc: "Scompone un URL in host, percorso e parametri, poi lo ricostruisce.", category: "convert", emoji: "🧭", keywords: "url parser componenti query parametri host percorso", component: UrlParser },
+  { id: "roman", name: "Numeri romani", desc: "Converti tra numeri arabi e romani.", category: "convert", emoji: "🏛️", keywords: "numeri romani roman numerals conversione", component: Roman },
+  { id: "contrast", name: "Contrasto colori (WCAG)", desc: "Rapporto di contrasto e conformità AA/AAA.", category: "convert", emoji: "🌗", keywords: "contrasto wcag accessibilità colore ratio aa aaa", component: Contrast },
 
   // encode
   { id: "base64", name: "Base64 testo", desc: "Codifica e decodifica testo in Base64 (UTF-8).", category: "encode", emoji: "🔡", keywords: "base64 encode decode testo", component: Base64Text },
@@ -98,6 +110,7 @@ export const TOOLS: ToolMeta[] = [
   { id: "html-entities", name: "Entità HTML", desc: "Escape e unescape di entità HTML.", category: "encode", emoji: "🏷️", keywords: "html entities escape amp lt gt", component: HtmlEntities },
   { id: "jwt", name: "Decoder JWT", desc: "Ispeziona header, payload e scadenza di un JWT.", category: "encode", emoji: "🔑", keywords: "jwt token json web decode", component: Jwt },
   { id: "unicode", name: "Testo ⇄ Unicode", desc: "Codifica in escape \\uXXXX o Phoenix /UXXXX e viceversa.", category: "encode", emoji: "🔣", keywords: "unicode escape codepoint code point \\u phoenix testo caratteri", component: Unicode },
+  { id: "basic-auth", name: "Basic Auth", desc: "Genera e decodifica l'header Authorization: Basic.", category: "encode", emoji: "🪪", keywords: "basic auth authorization header credenziali base64 utente password", component: BasicAuth },
 
   // format
   { id: "json-format", name: "JSON formatter", desc: "Formatta, valida e minifica JSON.", category: "format", emoji: "🧾", keywords: "json format pretty minify validate", component: JsonFormat },
@@ -119,6 +132,8 @@ export const TOOLS: ToolMeta[] = [
   { id: "regex", name: "Tester regex", desc: "Prova espressioni regolari con evidenziazione.", category: "text", emoji: "✳️", keywords: "regex regexp espressioni regolari match", component: Regex },
   { id: "markdown", name: "Anteprima Markdown", desc: "Rendi Markdown in HTML in tempo reale.", category: "text", emoji: "📓", keywords: "markdown md preview anteprima", component: Markdown },
   { id: "escape", name: "Escape stringa", desc: "Escape/unescape per JSON, JS e altri linguaggi.", category: "text", emoji: "␛", keywords: "escape unescape backslash stringa", component: Escape },
+  { id: "text-lines", name: "Utilità righe", desc: "Ordina, deduplica, numera e ripulisce elenchi di righe.", category: "text", emoji: "📋", keywords: "righe linee ordina dedup deduplica unique sort trim elenco lista", component: TextLines },
+  { id: "slug", name: "Slugify", desc: "Trasforma un testo in uno slug per URL.", category: "text", emoji: "🐌", keywords: "slug slugify url friendly permalink accenti", component: Slug },
 
   // pdf
   { id: "pdf-to-image", name: "PDF → immagini", desc: "Esporta le pagine come PNG o JPEG.", category: "pdf", emoji: "🖼️", keywords: "pdf immagini png jpeg render pagine", component: PdfToImage },
@@ -145,6 +160,7 @@ export const TOOLS: ToolMeta[] = [
   { id: "data-gen", name: "Generatore dati di test", desc: "IBAN, codice fiscale, P.IVA e persone in JSON/CSV/SQL.", category: "test", emoji: "🧬", keywords: "dati test iban codice fiscale piva fake generatore", component: DataGen },
   { id: "smoke-runner", name: "Smoke / synthetic runner", desc: "Sequenza di chiamate con asserzioni.", category: "test", emoji: "🔦", keywords: "smoke synthetic test asserzioni steps collaudo", component: SmokeRunner },
   { id: "http-proxy", name: "HTTP proxy / inspector", desc: "Reverse-proxy verso un target: logga e ispeziona.", category: "test", emoji: "🛰️", keywords: "http proxy inspector traffico reverse debug", component: HttpProxy },
+  { id: "http-status", name: "Codici di stato HTTP", desc: "Riferimento ricercabile dei codici di stato HTTP.", category: "test", emoji: "📟", keywords: "http status codici stato 404 500 riferimento reference", component: HttpStatus },
 ];
 
 export function toolsByCategory(cat: CategoryId): ToolMeta[] {
