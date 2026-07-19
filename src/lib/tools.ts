@@ -9,6 +9,8 @@ import JsonCsv from "./tools/JsonCsv.svelte";
 import Roman from "./tools/Roman.svelte";
 import Contrast from "./tools/Contrast.svelte";
 import UrlParser from "./tools/UrlParser.svelte";
+import TomlJson from "./tools/TomlJson.svelte";
+import CurlToCode from "./tools/CurlToCode.svelte";
 
 import Base64Text from "./tools/Base64Text.svelte";
 import Base64Image from "./tools/Base64Image.svelte";
@@ -17,6 +19,7 @@ import HtmlEntities from "./tools/HtmlEntities.svelte";
 import Jwt from "./tools/Jwt.svelte";
 import Unicode from "./tools/Unicode.svelte";
 import BasicAuth from "./tools/BasicAuth.svelte";
+import CertDecoder from "./tools/CertDecoder.svelte";
 
 import JsonFormat from "./tools/JsonFormat.svelte";
 import SqlFormat from "./tools/SqlFormat.svelte";
@@ -37,6 +40,7 @@ import Markdown from "./tools/Markdown.svelte";
 import Escape from "./tools/Escape.svelte";
 import TextLines from "./tools/TextLines.svelte";
 import Slug from "./tools/Slug.svelte";
+import JsonDiff from "./tools/JsonDiff.svelte";
 
 import PdfToImage from "./tools/PdfToImage.svelte";
 import PdfToText from "./tools/PdfToText.svelte";
@@ -102,15 +106,18 @@ export const TOOLS: ToolMeta[] = [
   { id: "url-parser", name: "Analizza URL", desc: "Scompone un URL in host, percorso e parametri, poi lo ricostruisce.", category: "convert", emoji: "🧭", keywords: "url parser componenti query parametri host percorso", component: UrlParser },
   { id: "roman", name: "Numeri romani", desc: "Converti tra numeri arabi e romani.", category: "convert", emoji: "🏛️", keywords: "numeri romani roman numerals conversione", component: Roman },
   { id: "contrast", name: "Contrasto colori (WCAG)", desc: "Rapporto di contrasto e conformità AA/AAA.", category: "convert", emoji: "🌗", keywords: "contrasto wcag accessibilità colore ratio aa aaa", component: Contrast },
+  { id: "toml-json", name: "TOML ⇄ JSON", desc: "Converti tra TOML e JSON in entrambe le direzioni.", category: "convert", emoji: "🧰", keywords: "toml json converti config configurazione cargo pyproject", component: TomlJson },
+  { id: "curl-code", name: "cURL → codice", desc: "Trasforma un comando curl in fetch, Python, axios o HTTPie.", category: "convert", emoji: "🌀", keywords: "curl fetch python requests axios httpie http codice converti comando", component: CurlToCode },
 
   // encode
   { id: "base64", name: "Base64 testo", desc: "Codifica e decodifica testo in Base64 (UTF-8).", category: "encode", emoji: "🔡", keywords: "base64 encode decode testo", component: Base64Text },
   { id: "base64-image", name: "Base64 ⇄ immagine", desc: "Immagine in data-URI Base64 e viceversa.", category: "encode", emoji: "🖼️", keywords: "base64 image immagine data uri", component: Base64Image },
   { id: "url", name: "URL encode / decode", desc: "Percent-encoding di URL e componenti.", category: "encode", emoji: "🔗", keywords: "url percent encode decode", component: UrlEncode },
   { id: "html-entities", name: "Entità HTML", desc: "Escape e unescape di entità HTML.", category: "encode", emoji: "🏷️", keywords: "html entities escape amp lt gt", component: HtmlEntities },
-  { id: "jwt", name: "Decoder JWT", desc: "Ispeziona header, payload e scadenza di un JWT.", category: "encode", emoji: "🔑", keywords: "jwt token json web decode", component: Jwt },
+  { id: "jwt", name: "Decoder JWT", desc: "Ispeziona header, payload, scadenza e verifica la firma di un JWT.", category: "encode", emoji: "🔑", keywords: "jwt token json web decode firma verifica hmac rsa ecdsa signature", component: Jwt },
   { id: "unicode", name: "Testo ⇄ Unicode", desc: "Codifica in escape \\uXXXX o Phoenix /UXXXX e viceversa.", category: "encode", emoji: "🔣", keywords: "unicode escape codepoint code point \\u phoenix testo caratteri", component: Unicode },
   { id: "basic-auth", name: "Basic Auth", desc: "Genera e decodifica l'header Authorization: Basic.", category: "encode", emoji: "🪪", keywords: "basic auth authorization header credenziali base64 utente password", component: BasicAuth },
+  { id: "cert-decode", name: "Decoder certificati X.509", desc: "Ispeziona un certificato PEM: soggetto, emittente, validità, SAN e impronte.", category: "encode", emoji: "📜", keywords: "certificato certificate x509 pem ssl tls san impronta fingerprint decoder", component: CertDecoder },
 
   // format
   { id: "json-format", name: "JSON formatter", desc: "Formatta, valida e minifica JSON.", category: "format", emoji: "🧾", keywords: "json format pretty minify validate", component: JsonFormat },
@@ -134,6 +141,7 @@ export const TOOLS: ToolMeta[] = [
   { id: "escape", name: "Escape stringa", desc: "Escape/unescape per JSON, JS e altri linguaggi.", category: "text", emoji: "␛", keywords: "escape unescape backslash stringa", component: Escape },
   { id: "text-lines", name: "Utilità righe", desc: "Ordina, deduplica, numera e ripulisce elenchi di righe.", category: "text", emoji: "📋", keywords: "righe linee ordina dedup deduplica unique sort trim elenco lista", component: TextLines },
   { id: "slug", name: "Slugify", desc: "Trasforma un testo in uno slug per URL.", category: "text", emoji: "🐌", keywords: "slug slugify url friendly permalink accenti", component: Slug },
+  { id: "json-diff", name: "Diff JSON", desc: "Confronto semantico tra due JSON: chiavi aggiunte, rimosse e modificate.", category: "text", emoji: "🆚", keywords: "json diff confronto differenze semantico strutturale chiavi compara", component: JsonDiff },
 
   // pdf
   { id: "pdf-to-image", name: "PDF → immagini", desc: "Esporta le pagine come PNG o JPEG.", category: "pdf", emoji: "🖼️", keywords: "pdf immagini png jpeg render pagine", component: PdfToImage },
