@@ -5,6 +5,7 @@
 
 mod apitest;
 mod pdf;
+mod pdftext;
 mod update;
 
 use base64::Engine;

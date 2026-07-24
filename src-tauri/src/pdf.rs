@@ -379,23 +379,37 @@ pub async fn pdf_check_pdfa(path: String) -> Result<PdfaReport, String> {
 // Compare
 // ---------------------------------------------------------------------------
 
+/// Text comparison. Lines come from `pdftext::document_lines`, which rebuilds
+/// them from glyph geometry rather than trusting pdfium's own line breaks —
+/// those depend on the nominal font size and diverge between producers, so two
+/// identical documents written by, say, Aspose and PDFBox would otherwise
+/// report hundreds of phantom differences on table rows. See `pdftext`.
 #[tauri::command]
 pub async fn pdf_compare_text(a: String, b: String) -> Result<TextDiff, String> {
     tokio::task::spawn_blocking(move || -> Result<TextDiff, String> {
-        let diff = pdfa_core::confronto::confronta_testo(Path::new(&a), Path::new(&b)).map_err(|e| e.to_string())?;
-        let changes = diff
-            .righe
-            .iter()
-            .map(|r| {
-                let kind = match r.tipo.as_str() {
-                    "aggiunta" => "add",
-                    "rimossa" => "del",
-                    _ => "eq",
-                };
-                DiffChange { kind: kind.to_string(), text: r.testo.clone() }
-            })
-            .collect();
-        Ok(TextDiff { added: diff.aggiunte as u32, removed: diff.rimosse as u32, changes })
+        let la = crate::pdftext::document_lines(Path::new(&a))?;
+        let lb = crate::pdftext::document_lines(Path::new(&b))?;
+
+        let (ra, rb): (Vec<&str>, Vec<&str>) =
+            (la.iter().map(String::as_str).collect(), lb.iter().map(String::as_str).collect());
+        let diff = similar::TextDiff::from_slices(&ra, &rb);
+        let (mut added, mut removed) = (0u32, 0u32);
+        let mut changes = Vec::new();
+        for change in diff.iter_all_changes() {
+            let kind = match change.tag() {
+                similar::ChangeTag::Insert => {
+                    added += 1;
+                    "add"
+                }
+                similar::ChangeTag::Delete => {
+                    removed += 1;
+                    "del"
+                }
+                similar::ChangeTag::Equal => "eq",
+            };
+            changes.push(DiffChange { kind: kind.to_string(), text: change.value().to_string() });
+        }
+        Ok(TextDiff { added, removed, changes })
     })
     .await
     .map_err(|e| e.to_string())?
