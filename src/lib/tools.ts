@@ -59,6 +59,7 @@ import PdfMetadata from "./tools/PdfMetadata.svelte";
 import PdfStructure from "./tools/PdfStructure.svelte";
 import PdfUa from "./tools/PdfUa.svelte";
 import PdfA from "./tools/PdfA.svelte";
+import PdfStandards from "./tools/PdfStandards.svelte";
 
 import LoadTest from "./tools/LoadTest.svelte";
 import MockServer from "./tools/MockServer.svelte";
@@ -161,6 +162,7 @@ export const TOOLS: ToolMeta[] = [
   { id: "pdf-structure", name: "Struttura / tag tree", desc: "Esporta l'albero dei tag in JSON o XML.", category: "pdf", emoji: "🌳", keywords: "pdf struttura tag tree accessibilità", component: PdfStructure },
   { id: "pdf-ua", name: "Check PDF/UA", desc: "Verifica di accessibilità (Matterhorn).", category: "pdf", emoji: "♿", keywords: "pdf ua accessibilità matterhorn verifica", component: PdfUa },
   { id: "pdf-a", name: "Check PDF/A (base)", desc: "Controllo di conformità di base per l'archiviazione.", category: "pdf", emoji: "📚", keywords: "pdf a archiviazione conformità verifica", component: PdfA },
+  { id: "pdf-standards", name: "Standard e formati PDF", desc: "Guida completa a PDF/A, PDF/UA, PDF/X, PDF/E, PDF/VT e PDF/R.", category: "pdf", emoji: "📖", keywords: "standard formati pdfa pdf/a pdfua pdf/ua pdfx pdf/x pdfe pdfvt pdfr archiviazione archiviabile accessibile accessibilità conformità livelli iso 19005 14289 15930 32000 matterhorn verapdf pades zugferd riferimento reference guida", component: PdfStandards },
 
   // test
   { id: "load-test", name: "Load / performance test", desc: "Carico concorrente con p50/p95/p99 e grafici live.", category: "test", emoji: "🚀", keywords: "load test carico performance jmeter benchmark percentili", component: LoadTest },
