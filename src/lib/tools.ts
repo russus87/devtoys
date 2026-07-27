@@ -61,6 +61,11 @@ import PdfUa from "./tools/PdfUa.svelte";
 import PdfA from "./tools/PdfA.svelte";
 import PdfStandards from "./tools/PdfStandards.svelte";
 
+import FontInspect from "./tools/FontInspect.svelte";
+import FontGlyphs from "./tools/FontGlyphs.svelte";
+import FontSubset from "./tools/FontSubset.svelte";
+import PdfFonts from "./tools/PdfFonts.svelte";
+
 import LoadTest from "./tools/LoadTest.svelte";
 import MockServer from "./tools/MockServer.svelte";
 import DataGen from "./tools/DataGen.svelte";
@@ -68,7 +73,7 @@ import SmokeRunner from "./tools/SmokeRunner.svelte";
 import HttpProxy from "./tools/HttpProxy.svelte";
 import HttpStatus from "./tools/HttpStatus.svelte";
 
-export type CategoryId = "convert" | "encode" | "format" | "generate" | "text" | "pdf" | "test";
+export type CategoryId = "convert" | "encode" | "format" | "generate" | "text" | "font" | "pdf" | "test";
 
 export interface Category {
   id: CategoryId;
@@ -82,6 +87,7 @@ export const CATEGORIES: Category[] = [
   { id: "format", label: "Formattatori", emoji: "🧾" },
   { id: "generate", label: "Generatori", emoji: "🎲" },
   { id: "text", label: "Testo", emoji: "🔤" },
+  { id: "font", label: "Font", emoji: "🅰️" },
   { id: "pdf", label: "PDF", emoji: "📄" },
   { id: "test", label: "API & Test", emoji: "🧪" },
 ];
@@ -143,6 +149,12 @@ export const TOOLS: ToolMeta[] = [
   { id: "text-lines", name: "Utilità righe", desc: "Ordina, deduplica, numera e ripulisce elenchi di righe.", category: "text", emoji: "📋", keywords: "righe linee ordina dedup deduplica unique sort trim elenco lista", component: TextLines },
   { id: "slug", name: "Slugify", desc: "Trasforma un testo in uno slug per URL.", category: "text", emoji: "🐌", keywords: "slug slugify url friendly permalink accenti", component: Slug },
   { id: "json-diff", name: "Diff JSON", desc: "Confronto semantico tra due JSON: chiavi aggiunte, rimosse e modificate.", category: "text", emoji: "🆚", keywords: "json diff confronto differenze semantico strutturale chiavi compara", component: JsonDiff },
+
+  // font
+  { id: "font-inspect", name: "Ispettore font", desc: "Nomi, metriche, tabelle, feature OpenType e permessi di embedding.", category: "font", emoji: "🔍", keywords: "font ispettore inspect ttf otf ttc woff woff2 metadati metriche fstype embedding licenza opentype variabile", component: FontInspect },
+  { id: "pdf-fonts", name: "Font di un PDF", desc: "Quali font usa il documento, quali sono incorporati e quali no.", category: "font", emoji: "📄", keywords: "pdf font incorporati embedded subset sostituzione standard 14 documento mancanti", component: PdfFonts },
+  { id: "font-glyphs", name: "Esplora glifi", desc: "Sfoglia i glifi del font con ricerca per carattere o codepoint.", category: "font", emoji: "🔡", keywords: "glifi glyph esplora font caratteri codepoint unicode anteprima mappa", component: FontGlyphs },
+  { id: "font-subset", name: "Subset font", desc: "Riduci un font ai soli caratteri che ti servono e vedi quanto risparmi.", category: "font", emoji: "✂️", keywords: "subset font riduci alleggerisci web woff dimensione risparmio caratteri", component: FontSubset },
 
   // pdf
   { id: "pdf-to-image", name: "PDF → immagini", desc: "Esporta le pagine come PNG o JPEG.", category: "pdf", emoji: "🖼️", keywords: "pdf immagini png jpeg render pagine", component: PdfToImage },

@@ -4,6 +4,7 @@
 //! touches the backend, keeping the whole app fully offline.
 
 mod apitest;
+mod font;
 mod pdf;
 mod pdftext;
 mod update;
@@ -484,6 +485,11 @@ pub fn run() {
             pdf::pdf_watermark,
             pdf::pdf_to_docx,
             pdf::images_to_pdf,
+            font::font_inspect,
+            font::font_glyphs,
+            font::font_subset,
+            font::pdf_fonts,
+            font::pdf_font_extract,
         ])
         .run(tauri::generate_context!())
         .expect("error while running DevToys");
