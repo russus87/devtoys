@@ -1,6 +1,6 @@
 [package]
 name = "devtoys"
-version = "0.6.0"
+version = "0.6.1"
 description = "A beautiful offline Swiss-army knife for developers"
 authors = ["russus"]
 edition = "2021"
@@ -35,6 +35,8 @@ uuid = { version = "1", features = ["v4", "v7"] }
 pdfa-core = { git = "https://github.com/russus87/pdf-accessibility-studio", package = "pdfa-core", rev = "a0a6cebd2d19fbffec7e6a474e584e1e250e7253" }
 # Same version pdfa-core binds to, so both share one Pdfium instance.
 pdfium-render = { version = "0.9", features = ["thread_safe", "image_025"] }
+# Same major as pdfa-core/pdfium-render so `DynamicImage` is one type everywhere.
+image = { version = "0.25", default-features = false, features = ["png"] }
 similar = "2"
 
 # --- API & Test tools -------------------------------------------------------

@@ -15,15 +15,32 @@
   interface CompareImageResult {
     diffBase64: string;
     changedRatio: number;
+    widthPx: number;
+    heightPx: number;
+    changedPixels: number;
+    totalPixels: number;
   }
 
   let pathA = $state<string | null>(null);
   let pathB = $state<string | null>(null);
   let mode = $state("testo");
   let page = $state(0);
-  let width = $state(900);
+  let dpi = $state("150");
+  let preset = $state("normale");
   let busy = $state(false);
   let error = $state("");
+
+  // Due PDF con contenuto identico prodotti da generatori diversi non danno mai
+  // pixel identici: un filetto scritto come rettangolo viene agganciato alla
+  // griglia dei pixel, lo stesso filetto scritto come tracciato viene sfumato, e
+  // singoli glifi scivolano di frazioni di pixel. Perdonare anche il pixel
+  // vicino (raggio) oltre che l'intensità (tolleranza) assorbe tutto questo
+  // senza nascondere il testo aggiunto o rimosso, che un vicino non ce l'ha.
+  const PRESETS: Record<string, { tolerance: number; radius: number }> = {
+    esatta: { tolerance: 0, radius: 0 },
+    normale: { tolerance: 128, radius: 1 },
+    permissiva: { tolerance: 160, radius: 2 },
+  };
 
   let textResult = $state<CompareTextResult | null>(null);
   let imageResult = $state<CompareImageResult | null>(null);
@@ -71,7 +88,9 @@
         a: pathA,
         b: pathB,
         page,
-        width,
+        dpi: Number(dpi),
+        tolerance: PRESETS[preset].tolerance,
+        radius: PRESETS[preset].radius,
       });
     } catch (e) {
       error = String(e);
@@ -126,20 +145,52 @@
     <div class="tool-controls wrap">
       <div class="stack" style="gap:4px">
         <span class="field-label">Pagina (0-based)</span>
-        <input class="input" type="number" min="0" step="1" bind:value={page} />
+        <input class="input page-input" type="number" min="0" step="1" bind:value={page} />
       </div>
       <div class="stack" style="gap:4px">
-        <span class="field-label">Larghezza</span>
-        <input class="input" type="number" min="100" step="50" bind:value={width} />
+        <span class="field-label">Tolleranza</span>
+        <Segmented
+          bind:value={preset}
+          options={[
+            { value: "esatta", label: "Esatta" },
+            { value: "normale", label: "Normale" },
+            { value: "permissiva", label: "Permissiva" },
+          ]}
+        />
+      </div>
+      <div class="stack" style="gap:4px">
+        <span class="field-label">Risoluzione</span>
+        <Segmented
+          bind:value={dpi}
+          options={[
+            { value: "72", label: "72 DPI" },
+            { value: "150", label: "150 DPI" },
+            { value: "300", label: "300 DPI" },
+          ]}
+        />
       </div>
       <button class="btn primary" onclick={compareImage} disabled={!canRun}>
         {busy ? "Confronto…" : "Confronta immagine"}
       </button>
     </div>
 
+    <div class="muted hint">
+      Con tolleranza <strong>esatta</strong> anche due PDF con contenuto identico risultano diversi:
+      generatori diversi rasterizzano filetti e caratteri con arrotondamenti diversi.
+      <strong>Normale</strong> assorbe questo rumore e lascia emergere solo le differenze reali.
+      A 72 DPI il rumore torna a farsi sentire: sotto i 150 DPI un filetto sottile è troppo vicino
+      alla dimensione del pixel.
+    </div>
+
     {#if imageResult}
       <div class="stack">
-        <div class="notice">differenza {(imageResult.changedRatio * 100).toFixed(2)}%</div>
+        <div class="notice">
+          differenza {(imageResult.changedRatio * 100).toFixed(3)}% ·
+          {imageResult.changedPixels.toLocaleString("it-IT")} px su
+          {imageResult.totalPixels.toLocaleString("it-IT")} ·
+          {imageResult.widthPx}×{imageResult.heightPx} a {dpi} DPI · tolleranza
+          {PRESETS[preset].tolerance}/255, raggio {PRESETS[preset].radius} px
+        </div>
         <img class="diff-img" src="data:image/png;base64,{imageResult.diffBase64}" alt="Differenza tra pagine" />
       </div>
     {/if}
@@ -184,6 +235,13 @@
   }
   .diff-line.add {
     background: color-mix(in srgb, var(--green) 12%, var(--surface));
+  }
+  .page-input {
+    width: 120px;
+  }
+  .hint {
+    font-size: 12px;
+    max-width: 70ch;
   }
   .diff-img {
     max-width: 100%;

@@ -1200,7 +1200,7 @@ dependencies = [
 
 [[package]]
 name = "devtoys"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "axum",
  "base64 0.22.1",
@@ -1209,6 +1209,7 @@ dependencies = [
  "futures",
  "hex",
  "hmac",
+ "image",
  "md-5",
  "pdfa-core",
  "pdfium-render",

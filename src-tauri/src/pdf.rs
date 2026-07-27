@@ -99,6 +99,10 @@ pub struct TextDiff {
 pub struct ImageDiff {
     pub diff_base64: String,
     pub changed_ratio: f64,
+    pub width_px: u32,
+    pub height_px: u32,
+    pub changed_pixels: u64,
+    pub total_pixels: u64,
 }
 
 // ---------------------------------------------------------------------------
@@ -415,12 +419,117 @@ pub async fn pdf_compare_text(a: String, b: String) -> Result<TextDiff, String> 
     .map_err(|e| e.to_string())?
 }
 
+/// Render width in pixels for `page` of `path` at `dpi`, from the page's own
+/// width in PDF points (1 pt = 1/72"). Deliberately *not* a fixed pixel width:
+/// rendering both files at the same DPI keeps them at true physical scale, so a
+/// page-size mismatch (A4 vs Letter) shows up as a difference instead of being
+/// silently normalised away.
+fn width_for_dpi(path: &Path, page: u32, dpi: u32) -> Result<u32, String> {
+    let (w_pt, _) = pdfa_core::dimensioni_pagina(path, page as i32).map_err(|e| e.to_string())?;
+    let px = (w_pt as f64 / 72.0 * dpi as f64).round();
+    Ok((px as u32).clamp(100, 8000))
+}
+
+/// True when two pixels differ by more than `tol` on any channel.
+fn channels_differ(pa: [u8; 4], pb: [u8; 4], tol: u8) -> bool {
+    (0..4).any(|i| pa[i].abs_diff(pb[i]) > tol)
+}
+
+/// True when no pixel within `radius` of (x, y) in `other` matches `px`.
+///
+/// A plain intensity tolerance is not enough on its own: two producers emitting
+/// byte-identical geometry still rasterise it differently. A 0.5 pt rule written
+/// as an `re` rectangle gets snapped to two full black rows, while the same rule
+/// written as a generic path is antialiased across two rows — a delta of up to
+/// 245/255 on content that is provably identical. Allowing the match to come
+/// from a neighbouring pixel absorbs that, plus sub-pixel glyph shifts and
+/// whole-row baseline shifts, while genuinely added or removed content still has
+/// no match anywhere nearby.
+fn unmatched(px: [u8; 4], other: &image::RgbaImage, x: u32, y: u32, radius: u32, tol: u8) -> bool {
+    let (w, h) = (other.width(), other.height());
+    let x0 = x.saturating_sub(radius);
+    let y0 = y.saturating_sub(radius);
+    for ny in y0..=(y + radius).min(h.saturating_sub(1)) {
+        for nx in x0..=(x + radius).min(w.saturating_sub(1)) {
+            if !channels_differ(px, other.get_pixel(nx, ny).0, tol) {
+                return false;
+            }
+        }
+    }
+    true
+}
+
 #[tauri::command]
-pub async fn pdf_compare_image(a: String, b: String, page: u32, width: u32) -> Result<ImageDiff, String> {
+pub async fn pdf_compare_image(
+    a: String,
+    b: String,
+    page: u32,
+    dpi: u32,
+    tolerance: u8,
+    radius: u32,
+) -> Result<ImageDiff, String> {
     tokio::task::spawn_blocking(move || -> Result<ImageDiff, String> {
-        let cfr = pdfa_core::confronto::confronta_immagine(Path::new(&a), Path::new(&b), page as i32, width as i32)
+        use image::{Rgba, RgbaImage};
+
+        let dpi = dpi.clamp(24, 600);
+        let (pa, pb) = (Path::new(&a), Path::new(&b));
+        let ia = pdfa_core::documento::render_immagine(pa, page as i32, width_for_dpi(pa, page, dpi)? as i32)
+            .map_err(|e| e.to_string())?
+            .to_rgba8();
+        let ib = pdfa_core::documento::render_immagine(pb, page as i32, width_for_dpi(pb, page, dpi)? as i32)
+            .map_err(|e| e.to_string())?
+            .to_rgba8();
+
+        // Union of the two canvases: whatever only one of them covers counts as
+        // a difference rather than being cropped out of the comparison.
+        let w = ia.width().max(ib.width());
+        let h = ia.height().max(ib.height());
+        let mut diff = RgbaImage::new(w, h);
+        let mut changed: u64 = 0;
+
+        for y in 0..h {
+            for x in 0..w {
+                let inside_a = x < ia.width() && y < ia.height();
+                let inside_b = x < ib.width() && y < ib.height();
+                let va = inside_a.then(|| ia.get_pixel(x, y).0);
+                let vb = inside_b.then(|| ib.get_pixel(x, y).0);
+                let differs = match (va, vb) {
+                    // Fast path: most pixels are byte-identical, so only fall back
+                    // to the neighbourhood scan where the two actually disagree.
+                    (Some(ca), Some(cb)) if !channels_differ(ca, cb, tolerance) => false,
+                    // Symmetric: matching A against B alone would hide removals.
+                    (Some(ca), Some(cb)) => {
+                        radius == 0
+                            || unmatched(ca, &ib, x, y, radius, tolerance)
+                            || unmatched(cb, &ia, x, y, radius, tolerance)
+                    }
+                    _ => true,
+                };
+                if differs {
+                    changed += 1;
+                    diff.put_pixel(x, y, Rgba([220, 40, 40, 255]));
+                } else {
+                    // Original, lightened, so the red of the differences stands out.
+                    let base = va.unwrap_or([255, 255, 255, 255]);
+                    diff.put_pixel(x, y, Rgba([128 + base[0] / 2, 128 + base[1] / 2, 128 + base[2] / 2, 255]));
+                }
+            }
+        }
+
+        let mut buf = Vec::new();
+        image::DynamicImage::ImageRgba8(diff)
+            .write_to(&mut std::io::Cursor::new(&mut buf), image::ImageFormat::Png)
             .map_err(|e| e.to_string())?;
-        Ok(ImageDiff { diff_base64: cfr.diff_png_base64, changed_ratio: cfr.percentuale / 100.0 })
+
+        let total = w as u64 * h as u64;
+        Ok(ImageDiff {
+            diff_base64: B64.encode(&buf),
+            changed_ratio: if total == 0 { 0.0 } else { changed as f64 / total as f64 },
+            width_px: w,
+            height_px: h,
+            changed_pixels: changed,
+            total_pixels: total,
+        })
     })
     .await
     .map_err(|e| e.to_string())?
