@@ -186,25 +186,25 @@ pub struct PdfFontsReport {
 // Reading a font file
 // ---------------------------------------------------------------------------
 
-fn read_file(path: &str) -> Result<Vec<u8>, String> {
+pub(crate) fn read_file(path: &str) -> Result<Vec<u8>, String> {
     std::fs::read(path).map_err(|e| format!("non riesco a leggere il file: {e}"))
 }
 
-fn file_name(path: &str) -> String {
+pub(crate) fn file_name(path: &str) -> String {
     Path::new(path)
         .file_name()
         .map(|n| n.to_string_lossy().into_owned())
         .unwrap_or_else(|| path.to_string())
 }
 
-fn parse<'a>(data: &'a [u8]) -> Result<FontData<'a>, String> {
+pub(crate) fn parse<'a>(data: &'a [u8]) -> Result<FontData<'a>, String> {
     ReadScope::new(data)
         .read::<FontData<'a>>()
         .map_err(|_| "formato non riconosciuto: attesi TTF, OTF, TTC, WOFF o WOFF2".to_string())
 }
 
 /// How many fonts the file holds (>1 only for a TrueType collection).
-fn font_count(data: &FontData<'_>) -> usize {
+pub(crate) fn font_count(data: &FontData<'_>) -> usize {
     match data {
         FontData::OpenType(otf) => match &otf.data {
             allsorts::tables::OpenTypeData::Single(_) => 1,
@@ -407,7 +407,7 @@ pub async fn font_inspect(path: String, index: usize) -> Result<FontReport, Stri
         .map_err(|e| e.to_string())?
 }
 
-fn inspect_blocking(path: &str, index: usize) -> Result<FontReport, String> {
+pub(crate) fn inspect_blocking(path: &str, index: usize) -> Result<FontReport, String> {
     let bytes = read_file(path)?;
     let data = parse(&bytes)?;
     let count = font_count(&data);

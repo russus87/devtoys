@@ -64,6 +64,7 @@ import PdfStandards from "./tools/PdfStandards.svelte";
 import FontInspect from "./tools/FontInspect.svelte";
 import FontGlyphs from "./tools/FontGlyphs.svelte";
 import FontSubset from "./tools/FontSubset.svelte";
+import FontConvert from "./tools/FontConvert.svelte";
 import PdfFonts from "./tools/PdfFonts.svelte";
 
 import LoadTest from "./tools/LoadTest.svelte";
@@ -155,6 +156,7 @@ export const TOOLS: ToolMeta[] = [
   { id: "pdf-fonts", name: "Font di un PDF", desc: "Quali font usa il documento, quali sono incorporati e quali no.", category: "font", emoji: "📄", keywords: "pdf font incorporati embedded subset sostituzione standard 14 documento mancanti", component: PdfFonts },
   { id: "font-glyphs", name: "Esplora glifi", desc: "Sfoglia i glifi del font con ricerca per carattere o codepoint.", category: "font", emoji: "🔡", keywords: "glifi glyph esplora font caratteri codepoint unicode anteprima mappa", component: FontGlyphs },
   { id: "font-subset", name: "Subset font", desc: "Riduci un font ai soli caratteri che ti servono e vedi quanto risparmi.", category: "font", emoji: "✂️", keywords: "subset font riduci alleggerisci web woff dimensione risparmio caratteri", component: FontSubset },
+  { id: "font-convert", name: "Converti font", desc: "Da TTF a OTF e viceversa, oppure le metriche AFM di un font.", category: "font", emoji: "🔁", keywords: "converti conversione font ttf otf cff truetype opentype afm metriche adobe postscript kerning woff", component: FontConvert },
 
   // pdf
   { id: "pdf-to-image", name: "PDF → immagini", desc: "Esporta le pagine come PNG o JPEG.", category: "pdf", emoji: "🖼️", keywords: "pdf immagini png jpeg render pagine", component: PdfToImage },

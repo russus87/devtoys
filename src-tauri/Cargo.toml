@@ -1,6 +1,6 @@
 [package]
 name = "devtoys"
-version = "0.7.0"
+version = "0.8.0"
 description = "A beautiful offline Swiss-army knife for developers"
 authors = ["russus"]
 edition = "2021"
@@ -51,6 +51,9 @@ futures = "0.3"
 # Parses OpenType/TrueType/TTC plus WOFF and WOFF2, and subsets them. The pure
 # Rust inflate backend keeps the build free of a system zlib on every platform.
 allsorts = { version = "0.16", default-features = false, features = ["flate2_rust"] }
+# Glyph outlines, glyph names and GPOS kerning for the converters. Already in
+# the tree through lopdf, so it costs nothing to build.
+ttf-parser = "0.25"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-single-instance = "2"

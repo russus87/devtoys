@@ -1200,7 +1200,7 @@ dependencies = [
 
 [[package]]
 name = "devtoys"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "allsorts",
  "axum",
@@ -1231,6 +1231,7 @@ dependencies = [
  "tauri-plugin-opener",
  "tauri-plugin-single-instance",
  "tokio",
+ "ttf-parser",
  "uuid",
 ]
 

@@ -5,6 +5,7 @@
 
 mod apitest;
 mod font;
+mod font_convert;
 mod pdf;
 mod pdftext;
 mod update;
@@ -490,6 +491,8 @@ pub fn run() {
             font::font_subset,
             font::pdf_fonts,
             font::pdf_font_extract,
+            font_convert::font_convert,
+            font_convert::font_afm,
         ])
         .run(tauri::generate_context!())
         .expect("error while running DevToys");
