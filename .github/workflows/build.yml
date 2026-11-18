@@ -63,8 +63,11 @@ jobs:
           sudo -u builder makepkg -f --noconfirm
           ls -1 *.pkg.tar.zst
 
+      # La quota degli artifact è dell'account: se è piena non deve fermare la release.
       - uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
+          retention-days: 3
           name: arch-package
           path: pkgstage/*.pkg.tar.zst
 
@@ -102,8 +105,11 @@ jobs:
           bash scripts/fetch-pdfium.sh src-tauri/pdfium
           npx tauri build --bundles appimage deb
 
+      # La quota degli artifact è dell'account: se è piena non deve fermare la release.
       - uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
+          retention-days: 3
           name: linux-bundles
           path: |
             src-tauri/target/release/bundle/appimage/*.AppImage
@@ -139,8 +145,11 @@ jobs:
           bash scripts/fetch-pdfium.sh src-tauri/pdfium
           npx tauri build --bundles msi nsis
 
+      # La quota degli artifact è dell'account: se è piena non deve fermare la release.
       - uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
+          retention-days: 3
           name: windows-installers
           path: |
             src-tauri/target/release/bundle/msi/*.msi
@@ -184,8 +193,11 @@ jobs:
           PDFIUM_OS=mac bash scripts/fetch-pdfium.sh src-tauri/pdfium
           npx tauri build --target ${{ matrix.target }} --bundles dmg
 
+      # La quota degli artifact è dell'account: se è piena non deve fermare la release.
       - uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
+          retention-days: 3
           name: macos-${{ matrix.target }}
           path: src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
 
